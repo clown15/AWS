@@ -10,18 +10,28 @@ resource "aws_instance" "ec2" {
         echo "Hello, Terraform" > /var/www/html/index.html
         EOF
   tags = {
-    Name = "terraform-example-${count.index}"
+    Name = "terraform-example"
   }
-  count = 1
+
+  root_block_device {
+    volume_size = "10"
+    tags = {
+        Name = "Terraform block"
+    }
+  }
 }
 
-resource "aws_ami_from_instance" "web_server_ami" {
-  name = "terraform_ami"
-  source_instance_id = aws_instance.ec2.0.id
+data "aws_instance" "ec2" {
+    filter {
+      name = "tag:Name"
+      values = ["terraform-example"]
+    }
+}
 
-  depends_on = [
-    aws_instance.ec2
-  ]
+locals {
+    mount_point = data.aws_instance.ec2.ebs_block_device.0.device_name
+}
 
-  snapshot_without_reboot = false
+output "test" {
+  value = local.mount_point
 }
