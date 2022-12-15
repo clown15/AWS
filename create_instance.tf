@@ -26,12 +26,34 @@ data "aws_instance" "ec2" {
       name = "tag:Name"
       values = ["terraform-example"]
     }
+    filter {
+      name = "instance-state-name"
+      values = ["running"]
+    }
 }
 
 locals {
-    mount_point = data.aws_instance.ec2.ebs_block_device.0.device_name
+    mount_point = data.aws_instance.ec2.root_block_device.*.device_name
 }
 
 output "test" {
-  value = local.mount_point
+  value = local.mount_point.0
+}
+
+resource "null_resource" "expand_disk" {
+  connection {
+    type = "ssh"
+    user = "ec2-user"
+    private_key = file("~/.ssh/aws-key.pem")
+    host = data.aws_instance.ec2.public_ip
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+        "sudo lsblk",
+        "sudo growpart ${local.mount_point.0} 1",
+        "sudo xfs_growfs -d /"
+        # "sudo xfs_growfs ${local.mount_point.0}1",
+    ]
+  }
 }
