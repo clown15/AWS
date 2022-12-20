@@ -58,7 +58,7 @@ resource "aws_internet_gateway" "Onboarding-igw" {
     vpc_id = aws_vpc.Onboarding-vpc.id
 
     tags = {
-        Nmae = "Onboarding-igw"
+        Name = "Onboarding-igw"
     }
 }
 
