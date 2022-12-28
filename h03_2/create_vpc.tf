@@ -13,19 +13,14 @@ resource "aws_vpc" "Onboarding-vpc" {
 resource "aws_subnet" "Onboarding-subnet" {
     vpc_id = aws_vpc.Onboarding-vpc.id
 
-    dynamic "subnets" {
-        for_each = var.public_subnets
-        iterator = "pub"
+    for_each = var.public_subnets
+        
+    availability_zone = each.value["availability_zone"]
+    cidr_block = each.value["cidr_block"]
+    map_public_ip_on_launch = each.value["map_public_ip_on_launch"]
 
-        content {
-            availability_zone = pub.value["availability_zone"]
-            cidr_block = pub.value["cidr_block"]
-            map_public_ip_on_launch = pub.value["map_public_ip_on_launch"]
-
-            tags = {
-                Name = "${pub.key}"
-            }
-        }
+    tags = {
+        Name = "${each.key}"
     }
 }
 
@@ -33,16 +28,14 @@ resource "aws_subnet" "Onboarding-subnet" {
 resource "aws_subnet" "Onboarding-subnet-pri" {
     vpc_id = aws_vpc.Onboarding-vpc.id
 
-    dynamic "subnets" {
-      for_each = var.private_subnets
+    for_each = var.private_subnets
+    
+    availability_zone = each.value["availability_zone"]
+    cidr_block = each.value["cidr_block"]
+    map_public_ip_on_launch = each.value["map_public_ip_on_launch"]
 
-      availability_zone = subnets.value["availability_zone"]
-      cidr_block = subnets.value["cidr_block"]
-      map_public_ip_on_launch = subnets.value["map_public_ip_on_launch"]
-
-      tags = {
-        Name = "${subnets.key}"
-      }
+    tags = {
+        Name = "${each.key}"
     }
 }
 
@@ -63,17 +56,17 @@ resource "aws_internet_gateway" "Onboarding-igw" {
 # }
 
 # 퍼블릭 라우팅 테이블 생성
-resource "aws_route_table" "public_route_table" {
+resource "aws_route_table" "public_rt" {
     vpc_id = aws_vpc.Onboarding-vpc.id
 
     tags = {
-        Name = "public route table"
+        Name = "public-RT"
     }
 }
 
 # 생성한 퍼블릭 라우팅 테이블에서 경로 설정(IGW)
 resource "aws_route" "public-igw-access" {
-    route_table_id = aws_route_table.public_route_table.id
+    route_table_id = aws_route_table.public_rt.id
     destination_cidr_block = "0.0.0.0/0"
     gateway_id = aws_internet_gateway.Onboarding-igw.id
 }
@@ -83,5 +76,14 @@ resource "aws_route_table_association" "public_subnets" {
     for_each = aws_subnet.Onboarding-subnet
     subnet_id = each.value.id
     # route_table_id = aws_vpc.Onboarding-vpc.main_route_table_id
-    route_table_id = aws_route_table.public_route_table.id
+    route_table_id = aws_route_table.public_rt.id
+}
+
+# 프라이빗 라우팅 테이블 생성
+resource "aws_route_table" "private_rt" {
+  vpc_id = aws_vpc.Onboarding-vpc.id
+
+  tags = {
+    Name = "private-RT"
+  }
 }

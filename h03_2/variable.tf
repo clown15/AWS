@@ -1,5 +1,5 @@
 variable "vpc_name" {
-    dedefault = "Onboarding-vpc  "
+    default = "Onboarding-vpc  "
 }
 
 variable "vpc-cidr" {
