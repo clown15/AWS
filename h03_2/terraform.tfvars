@@ -21,14 +21,17 @@ private_subnets = {
         availability_zone = "ap-northeast-2c"
         map_public_ip_on_launch = false
         cidr_block = "10.0.3.0/24"
-    },
-    "DB-1a" = {
+    }, 
+}
+
+private_subnets_db = {
+  "DB-1a" = {
         availability_zone = "ap-northeast-2a"
         map_public_ip_on_launch = false
         cidr_block = "10.0.4.0/24"
     },
     "DB-2c" = {
-        availability_zone = "ap-northeast-2a"
+        availability_zone = "ap-northeast-2c"
         map_public_ip_on_launch = false
         cidr_block = "10.0.5.0/24"
     },

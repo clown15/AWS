@@ -39,6 +39,21 @@ resource "aws_subnet" "Onboarding-subnet-pri" {
     }
 }
 
+# DB 서브넷
+resource "aws_subnet" "db_subnet" {
+    vpc_id = aws_vpc.Onboarding-vpc.id
+
+    for_each = var.private_subnets_db
+    
+    availability_zone = each.value["availability_zone"]
+    cidr_block = each.value["cidr_block"]
+    map_public_ip_on_launch = each.value["map_public_ip_on_launch"]
+
+    tags = {
+        Name = "${each.key}"
+    }
+}
+
 # 인터넷 게이트 웨이 생성
 resource "aws_internet_gateway" "Onboarding-igw" {
     vpc_id = aws_vpc.Onboarding-vpc.id
@@ -86,4 +101,12 @@ resource "aws_route_table" "private_rt" {
   tags = {
     Name = "private-RT"
   }
+}
+
+# 프라이빗 라우팅 테이블에 서브넷 명시적 연결
+resource "aws_route_table_association" "private_subnets" {
+  for_each = aws_subnet.Onboarding-subnet-pri
+
+  subnet_id = each.value.id
+  route_table_id = aws_route_table.private_rt.id
 }

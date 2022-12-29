@@ -21,3 +21,11 @@ variable "private_subnets" {
         cidr_block = string
     }))
 }
+
+variable "private_subnets_db" {
+    type = map(object({
+        availability_zone = string
+        map_public_ip_on_launch = bool
+        cidr_block = string
+    }))
+}
