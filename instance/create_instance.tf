@@ -1,5 +1,5 @@
 resource "aws_instance" "ec2" {
-  ami                    = "ami-0eddbd81024d3fbdd"
+  ami                    = data.aws_ami.amazon-linux-2-kernel-5.id
   instance_type          = "t2.micro"
   vpc_security_group_ids = [aws_security_group.sg.id]
   key_name               = "aws-key"
